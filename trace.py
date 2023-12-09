@@ -61,17 +61,17 @@ def tracert(destino, max_hops=30, timeout=3):
             except socket.herror:
                 router = router_ip
 
-            print(f"{ttl}. {router} {location} {rtt:.3f} ms")
+            print(f"(UDP) {ttl}. {router} {location} {rtt:.3f} ms")
 
             # Se atingiu o destino, sai do loop
             if router_ip == destino:
                 break
 
         except socket.timeout:
-            print(f"{ttl}. *")
-
+            print("Erro UDP: timed out")
             # Em caso de timeout, tenta enviar um pacote TCP
             try:
+                print("Enviando pacote TCP...")
                 ssnd_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 ssnd_tcp.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
                 ssnd_tcp.settimeout(timeout)
@@ -106,6 +106,10 @@ def tracert(destino, max_hops=30, timeout=3):
                     router_tcp = router_ip_tcp
 
                 print(f"{ttl}. (TCP) {router_tcp} {location_tcp} {rtt_tcp:.3f} ms")
+
+                if router_tcp == destino:
+                    print("Destino encontrado!")
+                    break
 
             except socket.error as e:
                 print(f"Erro TCP: {e}")
